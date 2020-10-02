@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ricardo.dscatalog.entities.Category;
+import com.ricardo.dscatalog.dto.CategoryDTO;
 import com.ricardo.dscatalog.services.CategoryService;
 
 // annotations de REST que servem para controlar e mapear as requisições 
@@ -27,8 +27,8 @@ public class CategoryResource {
 	private CategoryService service;	
 	
 	@GetMapping
-	public ResponseEntity<List<Category>> findAll(){
-		List<Category> list = service.findAll();	
+	public ResponseEntity<List<CategoryDTO>> findAll(){
+		List<CategoryDTO> list = service.findAll();	
 		return ResponseEntity.ok().body(list);
 	}
 }
