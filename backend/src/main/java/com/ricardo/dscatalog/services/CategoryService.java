@@ -7,12 +7,15 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ricardo.dscatalog.dto.CategoryDTO;
 import com.ricardo.dscatalog.entities.Category;
 import com.ricardo.dscatalog.repositories.CategoryRepository;
+import com.ricardo.dscatalog.services.exceptions.DatabaseException;
 import com.ricardo.dscatalog.services.exceptions.ResourceNotFoundException;
 
 
@@ -94,6 +97,25 @@ public class CategoryService {
 		}
 		catch(EntityNotFoundException e){
 			throw new ResourceNotFoundException("Id not found "+ id);
+		}
+	}
+
+	/*o métodp delete não terá a annotation @Transactional pois se fizer isso não será possivel capturar um 
+	 * exceção do bco de dados neste método trataremos de dois tipos de exceção 1º de um id inválido e o 
+	 * 2ª para garantir a integridade do bco de dados pois caso alguém queira deletar uma categoria de produtos não será
+	 * permitido, ex: caso tenhamos a categoria computador e dentro dela existe notebook, pc gamer e etc, só será possivel 
+	 * deletar um item interno e não a categoria raiz (computador) pois se este for deletado afetará outras sub categorias 
+	 * do sistema
+	 */
+	public void delete(Long id) {
+		try {
+			repository.deleteById(id);
+		}
+		catch (EmptyResultDataAccessException e) {
+			throw new ResourceNotFoundException("Id not found "+ id);
+		}
+		catch (DataIntegrityViolationException e) {
+			throw new DatabaseException("Integrity violation");
 		}
 	}
 }
