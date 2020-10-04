@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ricardo.dscatalog.dto.CategoryDTO;
 import com.ricardo.dscatalog.entities.Category;
 import com.ricardo.dscatalog.repositories.CategoryRepository;
-import com.ricardo.dscatalog.services.exceptions.EntityNotFoundException;
+import com.ricardo.dscatalog.services.exceptions.ResourceNotFoundException;
 
 
 /*A annotation @Service serve para registrar a classe como um componente que vai participar do sistema de 
@@ -64,7 +66,7 @@ public class CategoryService {
 	public CategoryDTO findById(Long id) {
 		Optional<Category> obj = repository.findById(id);
 		// o sistema tentará acessar o obj<category> caso ele não encontre vai trazer a mensagem descrita na exceção
-		Category entity = obj.orElseThrow(() -> new EntityNotFoundException("Entity not Found"));
+		Category entity = obj.orElseThrow(() -> new ResourceNotFoundException("Entity not Found"));
 		return new CategoryDTO(entity);
 		
 		/*Objeto Optinal é uma abordagem desde o Java 8 para evitar que você trabalhei com um objeto NULO, o Spring-Data-JPA 
@@ -72,7 +74,7 @@ public class CategoryService {
 		 */
 	}
 
-	//método de salvamento 
+	//método de Criação no bco de dados
 	@Transactional 
 	public CategoryDTO insert(CategoryDTO dto) {
 		Category entity = new Category();
@@ -81,4 +83,17 @@ public class CategoryService {
 		return new CategoryDTO(entity);
 	}
 
+	//método de atualização no bco de dados
+	@Transactional 
+	public CategoryDTO update(Long id, CategoryDTO dto) {
+		try{
+			Category entity = repository.getOne(id);
+			entity.setName(dto.getName());
+			entity = repository.save(entity);
+			return new CategoryDTO(entity);
+		}
+		catch(EntityNotFoundException e){
+			throw new ResourceNotFoundException("Id not found "+ id);
+		}
+	}
 }

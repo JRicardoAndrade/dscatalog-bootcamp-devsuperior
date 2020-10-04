@@ -9,10 +9,10 @@ package com.ricardo.dscatalog.services.exceptions;
 * Dentro da classe criamos um construtor que recebe uma mensagem que apenas repassa para o "super(msg);" -> super classe. 
 */
 
-public class EntityNotFoundException extends RuntimeException {
+public class ResourceNotFoundException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 	
-	public EntityNotFoundException(String msg) {
+	public ResourceNotFoundException(String msg) {
 		super(msg);
 	}
 
