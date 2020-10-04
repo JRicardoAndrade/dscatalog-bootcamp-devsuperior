@@ -1,14 +1,17 @@
 package com.ricardo.dscatalog.services;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ricardo.dscatalog.dto.CategoryDTO;
 import com.ricardo.dscatalog.entities.Category;
 import com.ricardo.dscatalog.repositories.CategoryRepository;
+import com.ricardo.dscatalog.services.exceptions.EntityNotFoundException;
 
 
 /*A annotation @Service serve para registrar a classe como um componente que vai participar do sistema de 
@@ -31,9 +34,14 @@ public class CategoryService {
 	@Autowired
 	private CategoryRepository repository;
 	
-	//Ma camada de serviço não vai trafegar entidade apenas os DTOs 
+	
+	
+	//Na camada de serviço não vai trafegar entidade apenas os DTOs 
+	@Transactional (readOnly = true)
 	public List<CategoryDTO> findAll(){
 		List<Category> list = repository.findAll();
+		return list.stream().map(x -> new CategoryDTO(x)).collect(Collectors.toList());
+		
 		
 		/*É necessário converter uma list de category em uma lista de categoryDTO pode ser feito de duas formas 
 		 * por um laço for que vai percorrer toda a lista e busca o category e adiciona na lista de categoryDTO ao final 
@@ -50,8 +58,18 @@ public class CategoryService {
 		 * de stream() para list().
 		 */
 		
-		return list.stream().map(x -> new CategoryDTO(x)).collect(Collectors.toList());
+	}
+
+	@Transactional (readOnly = true)
+	public CategoryDTO findById(Long id) {
+		Optional<Category> obj = repository.findById(id);
+		// o sistema tentará acessar o obj<category> caso ele não encontre vai trazer a mensagem descrita na exceção
+		Category entity = obj.orElseThrow(() -> new EntityNotFoundException("Entity not Found"));
+		return new CategoryDTO(entity);
 		
+		/*Objeto Optinal é uma abordagem desde o Java 8 para evitar que você trabalhei com um objeto NULO, o Spring-Data-JPA 
+		 * implementou a busca pelo ID utilizando um objeto optinal ele nunca retorna um objeto NULO. 
+		 */
 	}
 
 }
