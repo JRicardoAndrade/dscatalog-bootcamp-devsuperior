@@ -12,8 +12,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ricardo.dscatalog.dto.CategoryDTO;
 import com.ricardo.dscatalog.dto.ProductDTO;
+import com.ricardo.dscatalog.entities.Category;
 import com.ricardo.dscatalog.entities.Product;
+import com.ricardo.dscatalog.repositories.CategoryRepository;
 import com.ricardo.dscatalog.repositories.ProductRepository;
 import com.ricardo.dscatalog.services.exceptions.DatabaseException;
 import com.ricardo.dscatalog.services.exceptions.ResourceNotFoundException;
@@ -38,6 +41,9 @@ public class ProductService {
 	
 	@Autowired
 	private ProductRepository repository;
+	
+	@Autowired
+	private CategoryRepository categoryRepository;
 	
 	
 	
@@ -81,7 +87,7 @@ public class ProductService {
 	@Transactional 
 	public ProductDTO insert(ProductDTO dto) {
 		Product entity = new Product();
-		//entity.setName(dto.getName());
+		copyDtoToEntity(dto, entity);
 		entity = repository.save(entity);
 		return new ProductDTO(entity);
 	}
@@ -91,7 +97,7 @@ public class ProductService {
 	public ProductDTO update(Long id, ProductDTO dto) {
 		try{
 			Product entity = repository.getOne(id);
-			//entity.setName(dto.getName());
+			copyDtoToEntity(dto, entity);
 			entity = repository.save(entity);
 			return new ProductDTO(entity);
 		}
@@ -116,6 +122,22 @@ public class ProductService {
 		}
 		catch (DataIntegrityViolationException e) {
 			throw new DatabaseException("Integrity violation");
+		}
+	}
+
+	//método auxiliar privado pois não será acessado por outra classe
+	private void copyDtoToEntity(ProductDTO dto, Product entity) {
+		
+		entity.setName(dto.getName());
+		entity.setDescription(dto.getDescription());
+		entity.setDate(dto.getDate());
+		entity.setPrice(dto.getPrice());
+		entity.setImgUrl(dto.getImgUrl());
+		
+		entity.getCategories().clear();
+		for (CategoryDTO catDTO : dto.getCategories()) {
+			Category category = categoryRepository.getOne(catDTO.getId());
+			entity.getCategories().add(category);
 		}
 	}
 }
