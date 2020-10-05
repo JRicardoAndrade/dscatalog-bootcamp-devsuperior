@@ -1,11 +1,15 @@
 package com.ricardo.dscatalog.entities;
 
 import java.io.Serializable;
+import java.time.Instant;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 @Entity
@@ -24,6 +28,14 @@ public class Category implements Serializable {
 	//Annotation que auto incrementa o id quando você inserir o 1º o sistema automaticamente coloca os próx números
 	private Long id;
 	private String name;
+	
+	
+	//UTC sem fuso horário pegando Greenwich 
+	@Column (columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
+	private Instant createdAt;
+
+	@Column (columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
+	Instant updatedAt;
 	
 	public Category() {
 	}
@@ -48,6 +60,26 @@ public class Category implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	public Instant getCreatedAt() {
+		return createdAt;
+	}
+
+
+	public Instant getUpdateAt() {
+		return updatedAt;
+	}
+	
+	@PrePersist
+	public void prePersist() {
+		createdAt = Instant.now();
+	}
+	
+	@PreUpdate
+	public void preUpdate() {
+		updatedAt = Instant.now();
+	}
+
 
 /*
  *  hashCode() e equals() realizam a comparação se is ibjetos são igauis a diferença entre eles é que o hashCade() é mais rápido
@@ -58,6 +90,7 @@ public class Category implements Serializable {
  *  iguais utilizamos o equals() pois ele confirmara de forma mais precisa.  
  */
 	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
